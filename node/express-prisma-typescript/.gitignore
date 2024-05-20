@@ -1,5 +1,4 @@
 /node_modules/
-.envrc
+.env
 /dist/
 /.idea/
-.env

@@ -1,6 +1,8 @@
 services:
   db:
     image: postgres:alpine
+    env_file:
+      - .env
     container_name: db
     restart: always
     environment:
@@ -17,6 +19,7 @@ services:
       timeout: 1s
       retries: 15
   server:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: Dockerfile
@@ -28,7 +31,7 @@ services:
       - DATABASE_URL=${DOCKER_DATABASE_URL}
       - PORT=8080
     env_file:
-      - .envrc
+      - .env
     ports:
       - '8080:8080'
     volumes: # if there's any new files containing sources, add them as volumes
