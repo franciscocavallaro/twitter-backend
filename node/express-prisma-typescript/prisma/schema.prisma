@@ -23,6 +23,7 @@ model User {
   name     String? @db.VarChar(35) // Limit display name to 35 characters
   email    String  @unique // Unique constraint
   password String
+  privacy  Privacy @default(PUBLIC)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -59,4 +60,9 @@ model Post {
   deletedAt DateTime? // Optional value
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
+}
+
+enum Privacy {
+  PUBLIC
+  PRIVATE
 }

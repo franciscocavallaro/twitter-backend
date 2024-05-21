@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from 'class-validator'
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from 'class-validator'
+import { Privacy } from '@prisma/client'
 
 export class TokenDTO {
   token!: string
@@ -19,10 +20,15 @@ export class SignupInputDTO {
   @IsStrongPassword()
     password: string
 
-  constructor (email: string, username: string, password: string) {
+  @IsEnum(Privacy)
+  @IsNotEmpty()
+    privacy: Privacy
+
+  constructor (email: string, username: string, password: string, privacy: Privacy) {
     this.email = email
     this.password = password
     this.username = username
+    this.privacy = privacy
   }
 }
 

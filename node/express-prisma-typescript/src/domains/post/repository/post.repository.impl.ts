@@ -18,19 +18,41 @@ export class PostRepositoryImpl implements PostRepository {
     return new PostDTO(post)
   }
 
-  async getAllByDatePaginated (options: CursorPagination): Promise<PostDTO[]> {
+  async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<PostDTO[]> {
+    const followRelations = await this.db.follow.findMany({
+      where: {
+        followerId: userId
+      },
+      select: {
+        followedId: true
+      }
+    })
+    const followedUsers = followRelations.map((follow: { followedId: string }) => follow.followedId)
+
+    // Then, fetch the posts
     const posts = await this.db.post.findMany({
-      cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
+      cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
       take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
       orderBy: [
-        {
-          createdAt: 'desc'
-        },
-        {
-          id: 'asc'
-        }
-      ]
+        { createdAt: 'desc' },
+        { id: 'asc' }
+      ],
+      where: {
+        OR: [
+          { author: { privacy: 'PUBLIC' } },
+          {
+            AND: [
+              { author: { privacy: 'PRIVATE' } },
+              {
+                authorId: {
+                  in: followedUsers
+                }
+              }
+            ]
+          }
+        ]
+      }
     })
     return posts.map(post => new PostDTO(post))
   }
