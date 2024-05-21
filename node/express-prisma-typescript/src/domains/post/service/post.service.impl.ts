@@ -2,11 +2,17 @@ import { CreatePostInputDTO, PostDTO } from '../dto'
 import { PostRepository } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
-import { ForbiddenException, NotFoundException } from '@utils'
+import { db, ForbiddenException, NotFoundException } from '@utils'
 import { CursorPagination } from '@types'
+import { UserRepository, UserRepositoryImpl } from '@domains/user/repository'
+import { FollowerRepository, FollowerRepositoryImpl } from '@domains/follower/repository'
+import { Privacy } from '@prisma/client'
 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository) {}
+
+  userRepository: UserRepository = new UserRepositoryImpl(db)
+  followRepository: FollowerRepository = new FollowerRepositoryImpl(db)
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data)
@@ -21,9 +27,14 @@ export class PostServiceImpl implements PostService {
   }
 
   async getPost (userId: string, postId: string): Promise<PostDTO> {
-    // TODO: validate that the author has public profile or the user follows the author
     const post = await this.repository.getById(postId)
     if (!post) throw new NotFoundException('post')
+
+    if (await this.checkIfPrivateAccount(post.authorId) === Privacy.PRIVATE) {
+      const doesFollowExist = await this.followRepository.doesRelationExist(userId, post.authorId)
+      if (!doesFollowExist) throw new ForbiddenException()
+    }
+
     return post
   }
 
@@ -32,7 +43,22 @@ export class PostServiceImpl implements PostService {
   }
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<PostDTO[]> {
-    // TODO: throw exception when the author has a private profile and the user doesn't follow them
-    return await this.repository.getByAuthorId(authorId)
+    const posts = await this.repository.getByAuthorId(authorId)
+    if (posts.length === 0) throw new NotFoundException('post')
+
+    if (await this.checkIfPrivateAccount(authorId) === Privacy.PRIVATE) {
+      const doesFollowExist = await this.followRepository.doesRelationExist(userId, authorId)
+      if (!doesFollowExist) throw new ForbiddenException()
+    }
+
+    return posts
+  }
+
+  async checkIfPrivateAccount (userId: string): Promise<Privacy | null> {
+    const userDTO = await this.userRepository.getById(userId)
+    if (userDTO) {
+      return userDTO?.privacy
+    }
+    return null
   }
 }

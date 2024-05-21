@@ -1,13 +1,17 @@
+import { Privacy } from '@prisma/client'
+
 export class UserDTO {
   constructor (user: UserDTO) {
     this.id = user.id
     this.name = user.name
     this.createdAt = user.createdAt
+    this.privacy = user.privacy
   }
 
   id: string
   name: string | null
   createdAt: Date
+  privacy: Privacy
 }
 
 export class ExtendedUserDTO extends UserDTO {
