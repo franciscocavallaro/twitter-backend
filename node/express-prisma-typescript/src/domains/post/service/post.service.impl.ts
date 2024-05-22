@@ -7,12 +7,14 @@ import { CursorPagination } from '@types'
 import { UserRepository, UserRepositoryImpl } from '@domains/user/repository'
 import { FollowerRepository, FollowerRepositoryImpl } from '@domains/follower/repository'
 import { Privacy } from '@prisma/client'
+import { FollowerService, FollowerServiceImpl } from '@domains/follower/service'
 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository) {}
 
   userRepository: UserRepository = new UserRepositoryImpl(db)
-  followRepository: FollowerRepository = new FollowerRepositoryImpl(db)
+  followerRepository: FollowerRepository = new FollowerRepositoryImpl(db)
+  followerService: FollowerService = new FollowerServiceImpl(this.followerRepository)
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data)
@@ -31,7 +33,7 @@ export class PostServiceImpl implements PostService {
     if (!post) throw new NotFoundException('post')
 
     if (await this.checkIfPrivateAccount(post.authorId) === Privacy.PRIVATE) {
-      const doesFollowExist = await this.followRepository.doesRelationExist(userId, post.authorId)
+      const doesFollowExist = await this.followerService.doesRelationExist(userId, post.authorId)
       if (!doesFollowExist) throw new ForbiddenException()
     }
 
@@ -47,7 +49,7 @@ export class PostServiceImpl implements PostService {
     if (posts.length === 0) throw new NotFoundException('post')
 
     if (await this.checkIfPrivateAccount(authorId) === Privacy.PRIVATE) {
-      const doesFollowExist = await this.followRepository.doesRelationExist(userId, authorId)
+      const doesFollowExist = await this.followerService.doesRelationExist(userId, authorId)
       if (!doesFollowExist) throw new ForbiddenException()
     }
 
