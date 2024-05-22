@@ -11,4 +11,12 @@ export class FollowerServiceImpl implements FollowerService {
   async unfollowUser (currentUserId: string, userId: string): Promise<boolean> {
     return await this.repository.unfollowUser(currentUserId, userId)
   }
+
+  async doesRelationExist (userId: string, followedId: string): Promise<string | null> {
+    const exists = await this.repository.doesRelationExist(userId, followedId)
+    if (!exists) {
+      return null
+    }
+    return exists
+  }
 }

@@ -66,3 +66,16 @@ enum Privacy {
   PUBLIC
   PRIVATE
 }
+
+model Reaction {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  postId    String
+  reactorId String
+  type      ReactionType
+}
+
+enum ReactionType {
+  LIKE
+  RETWEET
+}

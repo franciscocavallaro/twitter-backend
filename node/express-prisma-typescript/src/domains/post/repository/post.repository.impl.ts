@@ -4,6 +4,7 @@ import { CursorPagination } from '@types'
 
 import { PostRepository } from '.'
 import { CreatePostInputDTO, PostDTO } from '../dto'
+import { UserDTO } from '@domains/user/dto'
 
 export class PostRepositoryImpl implements PostRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -81,5 +82,20 @@ export class PostRepositoryImpl implements PostRepository {
       }
     })
     return posts.map(post => new PostDTO(post))
+  }
+
+  async getAuthorByPost (postId: string): Promise<string> {
+    const post = await this.db.post.findUnique({
+      where: {
+        id: postId
+      },
+      select: {
+        authorId: true
+      }
+    })
+    if (!post) {
+      throw new Error('Post not found')
+    }
+    return post.authorId
   }
 }

@@ -61,4 +61,10 @@ export class PostServiceImpl implements PostService {
     }
     return null
   }
+
+  async getAuthorByPost (postId: string): Promise<string> {
+    const authorId = await this.repository.getAuthorByPost(postId)
+    if (!authorId) throw new NotFoundException('post')
+    return authorId
+  }
 }
