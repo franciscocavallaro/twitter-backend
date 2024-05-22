@@ -1,6 +1,5 @@
 import { CursorPagination } from '@types'
 import { CreatePostInputDTO, PostDTO } from '../dto'
-import { UserDTO } from '@domains/user/dto'
 
 export interface PostRepository {
   create: (userId: string, data: CreatePostInputDTO) => Promise<PostDTO>
