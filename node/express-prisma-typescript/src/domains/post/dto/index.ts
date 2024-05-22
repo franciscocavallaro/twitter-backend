@@ -28,6 +28,24 @@ export class PostDTO {
   createdAt: Date
 }
 
+export class CommentDTO {
+  constructor (comment: CommentDTO) {
+    this.id = comment.id
+    this.authorId = comment.authorId
+    this.content = comment.content
+    this.images = comment.images
+    this.createdAt = comment.createdAt
+    this.relatedTo = comment.relatedTo
+  }
+
+  id: string
+  authorId: string
+  content: string
+  images: string[]
+  createdAt: Date
+  relatedTo: string
+}
+
 export class ExtendedPostDTO extends PostDTO {
   constructor (post: ExtendedPostDTO) {
     super(post)

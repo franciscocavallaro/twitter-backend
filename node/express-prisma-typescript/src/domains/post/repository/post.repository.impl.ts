@@ -3,8 +3,8 @@ import { PrismaClient } from '@prisma/client'
 import { CursorPagination } from '@types'
 
 import { PostRepository } from '.'
-import { CreatePostInputDTO, PostDTO } from '../dto'
-import { UserDTO } from '@domains/user/dto'
+import { CommentDTO, CreatePostInputDTO, PostDTO } from '../dto'
+import { NotFoundException } from '@utils'
 
 export class PostRepositoryImpl implements PostRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -94,8 +94,33 @@ export class PostRepositoryImpl implements PostRepository {
       }
     })
     if (!post) {
-      throw new Error('Post not found')
+      throw new NotFoundException('post')
     }
     return post.authorId
+  }
+
+  async comment (userId: string, postId: string, content: string, images: string[], createdAt: Date, updatedAt: Date): Promise<CommentDTO> {
+    const post = await this.db.post.findUnique({
+      where: {
+        id: postId
+      }
+    })
+    if (!post) {
+      throw new Error('Post not found')
+    }
+    const comment = await this.db.post.create({
+      data: {
+        authorId: userId,
+        isRelatedTo: postId,
+        content,
+        images,
+        createdAt,
+        updatedAt
+      }
+    })
+    return new CommentDTO({
+      ...comment,
+      relatedTo: postId
+    })
   }
 }

@@ -1,4 +1,4 @@
-import { CreatePostInputDTO, PostDTO } from '../dto'
+import { CommentDTO, CreatePostInputDTO, PostDTO } from '../dto'
 import { PostRepository } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
@@ -68,5 +68,15 @@ export class PostServiceImpl implements PostService {
     const authorId = await this.repository.getAuthorByPost(postId)
     if (!authorId) throw new NotFoundException('post')
     return authorId
+  }
+
+  async commentPost (userId: string, postId: string, data: any): Promise<CommentDTO> {
+    const authorId = await this.getAuthorByPost(postId)
+    if (await this.checkIfPrivateAccount(authorId) === Privacy.PRIVATE) {
+      const doesFollowExist = await this.followerService.doesRelationExist(userId, authorId)
+      if (!doesFollowExist) throw new ForbiddenException()
+    }
+    const { content, images, createdAt, updatedAt } = data
+    return await this.repository.comment(userId, postId, content, images, createdAt, updatedAt)
   }
 }
