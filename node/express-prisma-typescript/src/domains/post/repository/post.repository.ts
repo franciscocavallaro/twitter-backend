@@ -16,4 +16,5 @@ export interface PostRepository {
     createdAt: Date,
     updatedAt: Date
   ) => Promise<CommentDTO>
+  getCommentsByUserId: (userId: string) => Promise<CommentDTO[]>
 }

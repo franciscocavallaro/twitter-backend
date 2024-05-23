@@ -123,4 +123,19 @@ export class PostRepositoryImpl implements PostRepository {
       relatedTo: postId
     })
   }
+
+  async getCommentsByUserId (userId: string): Promise<CommentDTO[]> {
+    const comments = await this.db.post.findMany({
+      where: {
+        isRelatedTo: {
+          not: null
+        },
+        authorId: userId
+      }
+    })
+    if (comments.length === 0) {
+      return []
+    }
+    return comments.map(comment => new CommentDTO({ ...comment, relatedTo: comment.isRelatedTo ?? '' }))
+  }
 }

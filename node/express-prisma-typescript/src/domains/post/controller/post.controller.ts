@@ -68,3 +68,11 @@ postRouter.post('/comment/:postId', async (req: Request, res: Response) => {
 
   return res.status(HttpStatus.CREATED).json(comment)
 })
+
+postRouter.get('/comments/:user_id', async (req: Request, res: Response) => {
+  const userId = req.params.user_id
+
+  const comments = await service.getCommentsByUserId(userId)
+
+  return res.status(HttpStatus.OK).json({ comments })
+})

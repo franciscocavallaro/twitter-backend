@@ -35,6 +35,26 @@ export class ReactionRepositoryImpl implements ReactionRepository {
     }
   }
 
+  async getLikesByUserId (userId: string): Promise<Array<[ReactionType, string]>> {
+    const likes = await this.db.reaction.findMany({
+      where: {
+        reactorId: userId,
+        type: ReactionType.LIKE
+      }
+    })
+    return likes.map(like => [like.type, 'PostId: ' + like.postId])
+  }
+
+  async getRetweetsByUserId (userId: string): Promise<Array<[ReactionType, string]>> {
+    const retweets = await this.db.reaction.findMany({
+      where: {
+        reactorId: userId,
+        type: ReactionType.RETWEET
+      }
+    })
+    return retweets.map(retweet => [retweet.type, 'PostId: ' + retweet.postId])
+  }
+
   async doesReactionExist (postId: string, reactorId: string, reactionType: ReactionType): Promise<boolean> {
     const reaction = await this.db.reaction.findFirst({
       where: {

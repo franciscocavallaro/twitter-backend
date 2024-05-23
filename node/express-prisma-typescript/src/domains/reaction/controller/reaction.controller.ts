@@ -29,3 +29,15 @@ reactionRouter.delete('/:post_id', async (req: Request, res: Response) => {
   }
   return res.status(HttpStatus.OK).json({ success })
 })
+
+reactionRouter.get('/likes/:user_id', async (req: Request, res: Response) => {
+  const userId = req.params.user_id
+  const likesReaction = await service.getLikesByUserId(userId)
+  return res.status(HttpStatus.OK).json({ likesReaction })
+})
+
+reactionRouter.get('/retweets/:user_id', async (req: Request, res: Response) => {
+  const userId = req.params.user_id
+  const retweetsReaction = await service.getRetweetsByUserId(userId)
+  return res.status(HttpStatus.OK).json({ retweetsReaction })
+})

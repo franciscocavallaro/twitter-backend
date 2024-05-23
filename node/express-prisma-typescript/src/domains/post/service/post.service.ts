@@ -8,4 +8,5 @@ export interface PostService {
   getPostsByAuthor: (userId: any, authorId: string) => Promise<PostDTO[]>
   getAuthorByPost: (postId: string) => Promise<string>
   commentPost: (userId: string, postId: string, data: any) => Promise<CommentDTO>
+  getCommentsByUserId: (userId: string) => Promise<CommentDTO[]>
 }

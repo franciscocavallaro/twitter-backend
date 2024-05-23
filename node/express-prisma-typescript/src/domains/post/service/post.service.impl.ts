@@ -32,7 +32,7 @@ export class PostServiceImpl implements PostService {
     const post = await this.repository.getById(postId)
     if (!post) throw new NotFoundException('post')
 
-    if (await this.checkIfPrivateAccount(post.authorId) === Privacy.PRIVATE) {
+    if ((await this.checkIfPrivateAccount(post.authorId)) === Privacy.PRIVATE) {
       const doesFollowExist = await this.followerService.doesRelationExist(userId, post.authorId)
       if (!doesFollowExist) throw new ForbiddenException()
     }
@@ -48,7 +48,7 @@ export class PostServiceImpl implements PostService {
     const posts = await this.repository.getByAuthorId(authorId)
     if (posts.length === 0) throw new NotFoundException('post')
 
-    if (await this.checkIfPrivateAccount(authorId) === Privacy.PRIVATE) {
+    if ((await this.checkIfPrivateAccount(authorId)) === Privacy.PRIVATE) {
       const doesFollowExist = await this.followerService.doesRelationExist(userId, authorId)
       if (!doesFollowExist) throw new ForbiddenException()
     }
@@ -72,11 +72,19 @@ export class PostServiceImpl implements PostService {
 
   async commentPost (userId: string, postId: string, data: any): Promise<CommentDTO> {
     const authorId = await this.getAuthorByPost(postId)
-    if (await this.checkIfPrivateAccount(authorId) === Privacy.PRIVATE) {
+    if ((await this.checkIfPrivateAccount(authorId)) === Privacy.PRIVATE) {
       const doesFollowExist = await this.followerService.doesRelationExist(userId, authorId)
       if (!doesFollowExist) throw new ForbiddenException()
     }
     const { content, images, createdAt, updatedAt } = data
     return await this.repository.comment(userId, postId, content, images, createdAt, updatedAt)
+  }
+
+  async getCommentsByUserId (userId: string): Promise<CommentDTO[]> {
+    const author = await this.userRepository.getById(userId)
+    if (!author) {
+      throw new NotFoundException('user')
+    }
+    return await this.repository.getCommentsByUserId(userId)
   }
 }
