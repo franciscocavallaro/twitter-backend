@@ -1,4 +1,6 @@
 // Runtime environments
+import * as process from 'node:process'
+
 export enum NodeEnv {
   DEV = 'development',
   PROD = 'production',
@@ -28,4 +30,12 @@ export class Constants {
 
   // Authentication secret
   static TOKEN_SECRET: string = process.env.TOKEN_SECRET ?? 'secret'
+
+  static BUCKET_ACCESS_KEY: string = process.env.BUCKET_ACCESS_KEY ?? 'accessKey'
+
+  static BUCKET_SECRET_ACCESS_KEY: string = process.env.BUCKET_SECRET_ACCESS_KEY ?? 'secretAccessKey'
+
+  static BUCKET_NAME: string = process.env.BUCKET_NAME ?? 'bucketName'
+
+  static BUCKET_REGION: string = process.env.BUCKET_REGION ?? 'bucketRegion'
 }

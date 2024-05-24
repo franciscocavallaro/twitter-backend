@@ -45,3 +45,11 @@ userRouter.delete('/', async (req: Request, res: Response) => {
 
   return res.status(HttpStatus.OK)
 })
+
+userRouter.post('/upload_profile_image', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+
+  const picUrl = await service.uploadProfilePic(userId)
+
+  return res.status(HttpStatus.OK).json(picUrl)
+})

@@ -58,4 +58,16 @@ export class UserRepositoryImpl implements UserRepository {
     })
     return user ? new ExtendedUserDTO(user) : null
   }
+
+  async uploadProfilePic (userId: string, url: string): Promise<string> {
+    const updatedUser = await this.db.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        profilePic: url
+      }
+    })
+    return updatedUser.profilePic
+  }
 }
