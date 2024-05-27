@@ -1,14 +1,15 @@
 import { NotFoundException } from '@utils/errors'
 import { OffsetPagination } from 'types'
-import { UserDTO } from '../dto'
+import { UserDTO, UserViewDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 import { signedURL } from '@s3-bucket'
+import { Privacy } from '@prisma/client'
 
 export class UserServiceImpl implements UserService {
   constructor (private readonly repository: UserRepository) {}
 
-  async getUser (userId: any): Promise<UserDTO> {
+  async getUser (userId: any): Promise<UserViewDTO> {
     const user = await this.repository.getById(userId)
     if (!user) throw new NotFoundException('user')
     return user
@@ -27,5 +28,9 @@ export class UserServiceImpl implements UserService {
     const url = await signedURL(userId + ' profile-pic')
     await this.repository.uploadProfilePic(userId, userId + ' profile-pic')
     return url
+  }
+
+  async getPrivacy (userId: string): Promise<Privacy> {
+    return await this.repository.getPrivacy(userId)
   }
 }

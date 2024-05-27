@@ -57,9 +57,9 @@ export class PostServiceImpl implements PostService {
   }
 
   async checkIfPrivateAccount (userId: string): Promise<Privacy | null> {
-    const userDTO = await this.userRepository.getById(userId)
-    if (userDTO) {
-      return userDTO?.privacy
+    const privacy = await this.userRepository.getPrivacy(userId)
+    if (privacy) {
+      return privacy
     }
     return null
   }

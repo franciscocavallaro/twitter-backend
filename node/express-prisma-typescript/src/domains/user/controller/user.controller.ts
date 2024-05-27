@@ -53,3 +53,11 @@ userRouter.post('/upload_profile_image', async (req: Request, res: Response) => 
 
   return res.status(HttpStatus.OK).json(picUrl)
 })
+
+userRouter.get('/privacy/:user_id', async (req: Request, res: Response) => {
+  const userId = req.params.user_id
+
+  const privacy = await service.getPrivacy(userId)
+
+  return res.status(HttpStatus.OK).json(privacy)
+})

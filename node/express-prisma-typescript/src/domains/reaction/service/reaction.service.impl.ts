@@ -21,8 +21,8 @@ export class ReactionServiceImpl implements ReactionService {
       throw new Error('Invalid reaction type')
     }
     const authorId = await this.postService.getAuthorByPost(postId)
-    const author = await this.userService.getUser(authorId)
-    if (author.privacy !== 'PUBLIC' && await this.followService.doesRelationExist(reactorId, authorId) === null) {
+    const authorPrivacy = await this.userService.getPrivacy(authorId)
+    if (authorPrivacy !== 'PUBLIC' && await this.followService.doesRelationExist(reactorId, authorId) === null) {
       throw new Error('User is not allowed to do that reaction')
     }
     return await this.repository.reactPost(postId, reactorId, reaction)

@@ -1,8 +1,9 @@
 import { SignupInputDTO } from '@domains/auth/dto'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Privacy } from '@prisma/client'
 import { OffsetPagination } from '@types'
-import { ExtendedUserDTO, UserDTO } from '../dto'
+import { ExtendedUserDTO, UserDTO, UserViewDTO } from '../dto'
 import { UserRepository } from './user.repository'
+import { NotFoundException } from '@utils'
 
 export class UserRepositoryImpl implements UserRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -13,13 +14,20 @@ export class UserRepositoryImpl implements UserRepository {
     }).then(user => new UserDTO(user))
   }
 
-  async getById (userId: any): Promise<UserDTO | null> {
+  async getById (userId: any): Promise<UserViewDTO | null> {
     const user = await this.db.user.findUnique({
       where: {
         id: userId
       }
     })
-    return user ? new UserDTO(user) : null
+    return user
+      ? new UserViewDTO({
+        id: user.id,
+        name: user.username,
+        username: user.username,
+        profilePicture: user.profilePic
+      })
+      : null
   }
 
   async delete (userId: any): Promise<void> {
@@ -69,5 +77,15 @@ export class UserRepositoryImpl implements UserRepository {
       }
     })
     return updatedUser.profilePic
+  }
+
+  async getPrivacy (userId: string): Promise<Privacy> {
+    const user = await this.db.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+    if (!user) throw new NotFoundException('user')
+    return user?.privacy
   }
 }
