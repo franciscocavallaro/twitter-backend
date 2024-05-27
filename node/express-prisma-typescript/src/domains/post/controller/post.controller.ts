@@ -76,3 +76,13 @@ postRouter.get('/comments/:user_id', async (req: Request, res: Response) => {
 
   return res.status(HttpStatus.OK).json({ comments })
 })
+
+postRouter.get('/comment/:post_id', async (req: Request, res: Response) => {
+  const postId = req.params.post_id
+  const { userId } = res.locals.context
+  const { limit, before, after } = req.query as Record<string, string>
+
+  const comments = await service.getCommentsByPostId(userId, postId, { limit: Number(limit), before, after })
+
+  return res.status(HttpStatus.OK).json({ comments })
+})

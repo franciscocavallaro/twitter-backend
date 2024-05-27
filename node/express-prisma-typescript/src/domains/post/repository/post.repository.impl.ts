@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { CursorPagination } from '@types'
 
 import { PostRepository } from '.'
-import { CommentDTO, CreatePostInputDTO, PostDTO } from '../dto'
+import { CommentDTO, CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
 import { NotFoundException } from '@utils'
 
 export class PostRepositoryImpl implements PostRepository {
@@ -137,5 +137,58 @@ export class PostRepositoryImpl implements PostRepository {
       return []
     }
     return comments.map(comment => new CommentDTO({ ...comment, relatedTo: comment.isRelatedTo ?? '' }))
+  }
+
+  async getCommentsByPost (postId: string, options: CursorPagination): Promise<CommentDTO[]> {
+    const comments = await this.db.post.findMany({
+      cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
+      skip: options.after ?? options.before ? 1 : undefined,
+      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
+      where: {
+        isRelatedTo: postId
+      }
+    })
+    if (comments.length === 0) {
+      return []
+    }
+
+    const reactions = await Promise.all(comments.map(async comment =>
+      await this.db.reaction.findMany({
+        where: {
+          postId: comment.id
+        }
+      })
+    ))
+
+    const commentsWithReactions = comments.map((comment, index) => ({
+      comment,
+      reactionsCount: reactions[index].length
+    }))
+
+    commentsWithReactions.sort((a, b) => b.reactionsCount - a.reactionsCount)
+
+    const sortedComments = commentsWithReactions.map(item => new CommentDTO({ ...item.comment, relatedTo: postId }))
+
+    return sortedComments
+  }
+
+  async getLikesPerPost (postId: string): Promise<number> {
+    const likes = await this.db.reaction.findMany({
+      where: {
+        postId,
+        type: 'LIKE'
+      }
+    })
+    return likes.length
+  }
+
+  async getRetweetsPerPost (postId: string): Promise<number> {
+    const retweets = await this.db.reaction.findMany({
+      where: {
+        postId,
+        type: 'RETWEET'
+      }
+    })
+    return retweets.length
   }
 }

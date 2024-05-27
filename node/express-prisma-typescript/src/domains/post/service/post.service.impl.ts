@@ -1,4 +1,4 @@
-import { CommentDTO, CreatePostInputDTO, PostDTO } from '../dto'
+import { CommentDTO, CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
 import { PostRepository } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
@@ -86,5 +86,43 @@ export class PostServiceImpl implements PostService {
       throw new NotFoundException('user')
     }
     return await this.repository.getCommentsByUserId(userId)
+  }
+
+  async getCommentsByPostId (userId: string, postId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
+    const comments = await this.repository.getCommentsByPost(postId, options)
+    if (comments.length === 0) {
+      throw new NotFoundException('comment')
+    }
+    const authorId = await this.getAuthorByPost(postId)
+    if ((await this.checkIfPrivateAccount(authorId)) === Privacy.PRIVATE) {
+      const doesFollowExist = await this.followerService.doesRelationExist(userId, authorId)
+      if (!doesFollowExist) throw new ForbiddenException()
+    }
+    return await Promise.all(
+      comments.map(async (comment) => {
+        const author = await this.userRepository.getById(comment.authorId)
+        if (!author) {
+          throw new NotFoundException('user')
+        }
+        const qtyLikes = await this.getLikesPerPost(comment.id)
+        const qtyRetweets = await this.getRetweetsPerPost(comment.id)
+        const qtyComments = await this.repository.getCommentsByPost(comment.id, { limit: 0 })
+        return new ExtendedPostDTO({
+          ...comment,
+          author,
+          qtyLikes,
+          qtyRetweets,
+          qtyComments: qtyComments.length
+        })
+      })
+    )
+  }
+
+  async getLikesPerPost (postId: string): Promise<number> {
+    return await this.repository.getLikesPerPost(postId)
+  }
+
+  async getRetweetsPerPost (postId: string): Promise<number> {
+    return await this.repository.getRetweetsPerPost(postId)
   }
 }
