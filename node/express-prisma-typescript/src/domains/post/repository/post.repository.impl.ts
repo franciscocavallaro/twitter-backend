@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { CursorPagination } from '@types'
 
 import { PostRepository } from '.'
-import { CommentDTO, CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
+import { CommentDTO, CreatePostInputDTO, PostDTO } from '../dto'
 import { NotFoundException } from '@utils'
 
 export class PostRepositoryImpl implements PostRepository {
@@ -40,6 +40,7 @@ export class PostRepositoryImpl implements PostRepository {
         { id: 'asc' }
       ],
       where: {
+        isRelatedTo: null,
         OR: [
           { author: { privacy: 'PUBLIC' } },
           {

@@ -8,11 +8,14 @@ import { UserRepository, UserRepositoryImpl } from '@domains/user/repository'
 import { FollowerRepository, FollowerRepositoryImpl } from '@domains/follower/repository'
 import { Privacy } from '@prisma/client'
 import { FollowerService, FollowerServiceImpl } from '@domains/follower/service'
+import { UserService, UserServiceImpl } from '@domains/user/service'
 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository) {}
 
   userRepository: UserRepository = new UserRepositoryImpl(db)
+  userService: UserService = new UserServiceImpl(this.userRepository)
+
   followerRepository: FollowerRepository = new FollowerRepositoryImpl(db)
   followerService: FollowerService = new FollowerServiceImpl(this.followerRepository)
 
@@ -28,7 +31,7 @@ export class PostServiceImpl implements PostService {
     await this.repository.delete(postId)
   }
 
-  async getPost (userId: string, postId: string): Promise<PostDTO> {
+  async getPost (userId: string, postId: string): Promise<ExtendedPostDTO> {
     const post = await this.repository.getById(postId)
     if (!post) throw new NotFoundException('post')
 
@@ -37,11 +40,47 @@ export class PostServiceImpl implements PostService {
       if (!doesFollowExist) throw new ForbiddenException()
     }
 
-    return post
+    const author = await this.userService.getUser(post.authorId)
+    const qtyLikes = await this.repository.getLikesPerPost(post.id)
+    const qtyRetweets = await this.repository.getRetweetsPerPost(post.id)
+    const qtyComments = (await this.repository.getCommentsByPost(post.id, { limit: 0 })).length
+
+    return new ExtendedPostDTO({
+      ...post,
+      author,
+      qtyLikes,
+      qtyRetweets,
+      qtyComments
+    })
   }
 
-  async getLatestPosts (userId: string, options: CursorPagination): Promise<PostDTO[]> {
-    return await this.repository.getAllByDatePaginated(userId, options)
+  async getLatestPosts (userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
+    const postDTO = await this.repository.getAllByDatePaginated(userId, options)
+    const extendedPostDto = await Promise.all(
+      postDTO.map(async (post) => {
+        const authorId = await this.getAuthorByPost(post.id)
+        if ((await this.checkIfPrivateAccount(authorId)) === Privacy.PRIVATE) {
+          const doesFollowExist = await this.followerService.doesRelationExist(userId, authorId)
+          if (!doesFollowExist) {
+            post.content = 'This user has a private account'
+            post.images = []
+          }
+        }
+        const author = await this.userService.getUser(post.authorId)
+        const qtyLikes = await this.getLikesPerPost(post.id)
+        const qtyRetweets = await this.getRetweetsPerPost(post.id)
+        const qtyComments = (await this.repository.getCommentsByPost(post.id, { limit: 0 })).length
+
+        return new ExtendedPostDTO({
+          ...post,
+          author,
+          qtyLikes,
+          qtyRetweets,
+          qtyComments
+        })
+      })
+    )
+    return extendedPostDto
   }
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<PostDTO[]> {
@@ -57,7 +96,7 @@ export class PostServiceImpl implements PostService {
   }
 
   async checkIfPrivateAccount (userId: string): Promise<Privacy | null> {
-    const privacy = await this.userRepository.getPrivacy(userId)
+    const privacy = await this.userService.getPrivacy(userId)
     if (privacy) {
       return privacy
     }
@@ -81,10 +120,6 @@ export class PostServiceImpl implements PostService {
   }
 
   async getCommentsByUserId (userId: string): Promise<CommentDTO[]> {
-    const author = await this.userRepository.getById(userId)
-    if (!author) {
-      throw new NotFoundException('user')
-    }
     return await this.repository.getCommentsByUserId(userId)
   }
 
@@ -100,10 +135,7 @@ export class PostServiceImpl implements PostService {
     }
     return await Promise.all(
       comments.map(async (comment) => {
-        const author = await this.userRepository.getById(comment.authorId)
-        if (!author) {
-          throw new NotFoundException('user')
-        }
+        const author = await this.userService.getUser(comment.authorId)
         const qtyLikes = await this.getLikesPerPost(comment.id)
         const qtyRetweets = await this.getRetweetsPerPost(comment.id)
         const qtyComments = await this.repository.getCommentsByPost(comment.id, { limit: 0 })
