@@ -1,6 +1,6 @@
 import { SignupInputDTO } from '@domains/auth/dto'
 import { PrismaClient, Privacy } from '@prisma/client'
-import { OffsetPagination } from '@types'
+import { CursorPagination, OffsetPagination } from '@types'
 import { ExtendedUserDTO, UserDTO, UserViewDTO } from '../dto'
 import { UserRepository } from './user.repository'
 import { NotFoundException } from '@utils'
@@ -87,5 +87,24 @@ export class UserRepositoryImpl implements UserRepository {
     })
     if (!user) throw new NotFoundException('user')
     return user?.privacy
+  }
+
+  async getByUsername (username: string, options: CursorPagination): Promise<UserViewDTO[]> {
+    const user = await this.db.user.findMany({
+      cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
+      skip: options.after ?? options.before ? 1 : undefined,
+      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
+      where: {
+        username: {
+          contains: username
+        }
+      }
+    })
+    return user.map(user => new UserViewDTO({
+      id: user.id,
+      name: user.username,
+      username: user.username,
+      profilePicture: user.profilePic
+    }))
   }
 }

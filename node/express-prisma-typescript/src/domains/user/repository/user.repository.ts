@@ -1,5 +1,5 @@
 import { SignupInputDTO } from '@domains/auth/dto'
-import { OffsetPagination } from '@types'
+import { CursorPagination, OffsetPagination } from '@types'
 import { ExtendedUserDTO, UserDTO, UserViewDTO } from '../dto'
 import { Privacy } from '@prisma/client'
 
@@ -11,4 +11,5 @@ export interface UserRepository {
   getByEmailOrUsername: (email?: string, username?: string) => Promise<ExtendedUserDTO | null>
   uploadProfilePic: (userId: string, url: string) => Promise<string>
   getPrivacy: (userId: string) => Promise<Privacy>
+  getByUsername: (username: string, options: CursorPagination) => Promise<UserViewDTO[]>
 }
