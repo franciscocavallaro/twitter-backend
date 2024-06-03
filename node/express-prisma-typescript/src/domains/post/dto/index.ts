@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
-import { ExtendedUserDTO, UserViewDTO } from '@domains/user/dto'
+import { UserViewDTO } from '@domains/user/dto'
 
 export class CreatePostInputDTO {
   @IsString()

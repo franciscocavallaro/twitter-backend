@@ -19,4 +19,8 @@ export class FollowerServiceImpl implements FollowerService {
     }
     return exists
   }
+
+  async areFollowingEachOther (userId: string, followedId: string): Promise<boolean> {
+    return await this.repository.areFollowingEachOther(userId, followedId)
+  }
 }

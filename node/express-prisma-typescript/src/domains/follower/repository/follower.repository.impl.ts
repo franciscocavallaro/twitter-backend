@@ -46,4 +46,10 @@ export class FollowerRepositoryImpl implements FollowerRepository {
     }
     return null
   }
+
+  async areFollowingEachOther (userId: string, followedId: string): Promise<boolean> {
+    const userFollows = await this.doesRelationExist(userId, followedId)
+    const followedFollows = await this.doesRelationExist(followedId, userId)
+    return !!userFollows && !!followedFollows
+  }
 }

@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import { Request, Response } from 'express'
-import { Constants } from '@utils'
+import { Constants, ForbiddenException } from '@utils'
 import { UnauthorizedException } from '@utils/errors'
+import { Socket } from 'socket.io'
 
 export const generateAccessToken = (payload: Record<string, string | boolean | number>): string => {
   // Do not use this in production, the token will last 24 hours
@@ -31,4 +32,14 @@ export const encryptPassword = async (password: string): Promise<string> => {
 
 export const checkPassword = async (password: string, hash: string): Promise<boolean> => {
   return await bcrypt.compare(password, hash)
+}
+
+export const socketAuth = (socket: Socket): void => {
+  const token = socket.request.headers.authorization
+  console.log(token)
+  if (!token) { throw new ForbiddenException() }
+  jwt.verify(token, Constants.TOKEN_SECRET, (err, context) => {
+    if (err) { throw new ForbiddenException() }
+    socket.data = context
+  })
 }

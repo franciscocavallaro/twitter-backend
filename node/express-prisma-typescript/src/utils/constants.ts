@@ -25,6 +25,9 @@ export class Constants {
   // Port to run the server in
   static PORT: string = process.env.PORT ?? '8080'
 
+  // Port to run the socket server in
+  static SOCKET_PORT: string = process.env.SOCKET_PORT ?? '3000'
+
   // CORS urls to allow
   static CORS_WHITELIST: string = process.env.CORS_WHITELIST ?? '*'
 

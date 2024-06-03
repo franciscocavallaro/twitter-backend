@@ -77,6 +77,34 @@ model Reaction {
   type      ReactionType
 }
 
+model Conversation {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  user1 String @db.Uuid
+  user2 String @db.Uuid
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  messages Message[]
+}
+
+model Message {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  content        String @db.VarChar(500)
+  senderId       String @db.Uuid
+  receiverId     String @db.Uuid
+  conversationId String @db.Uuid
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
 enum ReactionType {
   LIKE
   RETWEET
