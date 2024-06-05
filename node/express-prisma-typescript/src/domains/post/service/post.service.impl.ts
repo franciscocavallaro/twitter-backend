@@ -9,6 +9,7 @@ import { FollowerRepository, FollowerRepositoryImpl } from '@domains/follower/re
 import { Privacy } from '@prisma/client'
 import { FollowerService, FollowerServiceImpl } from '@domains/follower/service'
 import { UserService, UserServiceImpl } from '@domains/user/service'
+import { signedURL } from '@s3-bucket'
 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository) {}
@@ -21,7 +22,17 @@ export class PostServiceImpl implements PostService {
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data)
-    return await this.repository.create(userId, data)
+
+    const post = await this.repository.create(userId, data)
+
+    const images = post.images ?? []
+    const signedUrlsPromises = images.map(async image => await signedURL(image))
+    const signedUrls = await Promise.all(signedUrlsPromises)
+
+    return {
+      ...post,
+      images: signedUrls
+    }
   }
 
   async deletePost (userId: string, postId: string): Promise<void> {

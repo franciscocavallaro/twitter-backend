@@ -8,7 +8,6 @@ export class CreatePostInputDTO {
     content!: string
 
   @IsOptional()
-  @MaxLength(4)
     images?: string[]
 }
 
