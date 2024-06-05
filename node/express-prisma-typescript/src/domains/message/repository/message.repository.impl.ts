@@ -1,6 +1,6 @@
 import { MessageRepository } from '@domains/message/repository/message.repository'
 import { MessageDTO } from '@domains/message/dto'
-import { PrismaClient } from '@prisma/client'
+import { Conversation, PrismaClient } from '@prisma/client'
 
 export class MessageRepositoryImpl implements MessageRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -54,5 +54,14 @@ export class MessageRepositoryImpl implements MessageRepository {
       }
     })
     return !!conversation
+  }
+
+  async getConversation (conversationId: string): Promise<Conversation | null> {
+    const conversation = await this.db.conversation.findUnique({
+      where: {
+        id: conversationId
+      }
+    })
+    return conversation
   }
 }

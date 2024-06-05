@@ -9,7 +9,7 @@ export const messageRouter = Router()
 const messageRepository: MessageRepository = new MessageRepositoryImpl(db)
 const messageService: MessageService = new MessageServiceImpl(messageRepository)
 
-messageRouter.get('/get/:conversation_id', async (req, res) => {
+messageRouter.get('/:conversation_id', async (req, res) => {
   const { userId } = res.locals.context
   const conversationId = req.params.conversation_id
   const messages = await messageService.getMessages(userId, conversationId)

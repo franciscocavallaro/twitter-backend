@@ -85,7 +85,6 @@ export class PostServiceImpl implements PostService {
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<PostDTO[]> {
     const posts = await this.repository.getByAuthorId(authorId)
-    if (posts.length === 0) throw new NotFoundException('post')
 
     if ((await this.checkIfPrivateAccount(authorId)) === Privacy.PRIVATE) {
       const doesFollowExist = await this.followerService.doesRelationExist(userId, authorId)
@@ -120,6 +119,8 @@ export class PostServiceImpl implements PostService {
   }
 
   async getCommentsByUserId (userId: string): Promise<CommentDTO[]> {
+    const user = await this.userService.getUser(userId)
+    if (!user) throw new NotFoundException('user')
     return await this.repository.getCommentsByUserId(userId)
   }
 

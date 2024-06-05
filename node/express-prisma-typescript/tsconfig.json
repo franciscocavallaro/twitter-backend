@@ -19,12 +19,15 @@
     "strictNullChecks": true,
     "noImplicitAny": true,
     "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@*": ["./*"]
     }
   },
   "lib": ["es2022"],
-  "include": ["src/**/*"],
+  "include": ["src/**/*",
+    "src/swagger/swagger.ts"
+  ],
   "exclude": ["node_modules"]
 }

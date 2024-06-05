@@ -18,7 +18,7 @@ followerRouter.post('/follow/:user_id', async (req: Request, res: Response) => {
   if (wasSuccessful) {
     return res.status(HttpStatus.OK).json({ message: 'Followed successfully' })
   } else {
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'You already follow this user' })
+    return res.status(HttpStatus.CONFLICT).json({ message: 'You already follow this user' })
   }
 })
 
@@ -31,6 +31,6 @@ followerRouter.post('/unfollow/:user_id', async (req: Request, res: Response) =>
   if (wasSuccessful) {
     return res.status(HttpStatus.OK).json({ message: 'Unfollowed successfully' })
   } else {
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'You are not following, you were not following this user' })
+    return res.status(HttpStatus.CONFLICT).json({ message: 'You are not following, you were not following this user' })
   }
 })

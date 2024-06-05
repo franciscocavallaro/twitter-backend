@@ -77,6 +77,14 @@ export class PostRepositoryImpl implements PostRepository {
   }
 
   async getByAuthorId (authorId: string): Promise<PostDTO[]> {
+    const author = await this.db.user.findUnique({
+      where: {
+        id: authorId
+      }
+    })
+    if (!author) {
+      throw new NotFoundException('user')
+    }
     const posts = await this.db.post.findMany({
       where: {
         authorId

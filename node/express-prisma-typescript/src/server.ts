@@ -8,6 +8,8 @@ import { socketServer } from '@socket-server'
 import { Constants, NodeEnv, Logger } from '@utils'
 import { router } from '@router'
 import { ErrorHandling } from '@utils/errors'
+import swaggerUi from 'swagger-ui-express'
+import swaggerOutput from './swagger/swagger_output.json'
 
 const app = express()
 
@@ -29,7 +31,7 @@ app.use(
 )
 
 app.use('/api', router)
-
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerOutput))
 app.use(ErrorHandling)
 
 const server = createServer(app)
