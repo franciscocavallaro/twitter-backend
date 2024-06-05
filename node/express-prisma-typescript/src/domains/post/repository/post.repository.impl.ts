@@ -73,7 +73,7 @@ export class PostRepositoryImpl implements PostRepository {
         id: postId
       }
     })
-    return (post != null) ? new PostDTO(post) : null
+    return (post != null && post.isRelatedTo == null) ? new PostDTO(post) : null
   }
 
   async getByAuthorId (authorId: string): Promise<PostDTO[]> {
