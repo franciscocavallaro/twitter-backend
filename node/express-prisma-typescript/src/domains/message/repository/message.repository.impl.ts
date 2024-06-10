@@ -6,11 +6,14 @@ export class MessageRepositoryImpl implements MessageRepository {
   constructor (private readonly db: PrismaClient) {}
 
   async createMessage (senderId: string, receiverId: string, conversationId: string, content: string, createdAt: Date): Promise<MessageDTO | null> {
-    // check if the sender and the receiver are part of the conversation
     const conversation = await this.isUserPartOfConversation(senderId, conversationId)
     if (!conversation) {
       return null
     }
+    if (!content) {
+      return null
+    }
+
     const newMessage = await this.db.message.create({
       data: {
         senderId,
