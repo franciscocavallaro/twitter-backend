@@ -12,5 +12,9 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-      - run: npm ci
-      - run: npm test
+      - name: Install dependencies
+        run: npm install
+        working-directory: node/express-prisma-typescript
+      - name: Run tests
+        run: npm test
+        working-directory: node/express-prisma-typescript
