@@ -28,7 +28,7 @@ describe('Conversation', () => {
 
     prismaMock.conversation.create.mockResolvedValue(conversation)
 
-    const result = await conversationService.createConversation(user.id, user2.id)
+    const result = await conversationService.createConversation(user.id, user.id)
 
     assert.deepStrictEqual(result, conversation)
   })
