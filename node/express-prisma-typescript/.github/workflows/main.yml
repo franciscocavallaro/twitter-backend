@@ -9,9 +9,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
+          cache: 'npm'
       - name: Install dependencies
+        working-directory: ./node/express-prisma-typescript
         run: npm install
-        working-directory: ./node/express-prisma-typescript
       - name: Run tests
-        run: npm run test
         working-directory: ./node/express-prisma-typescript
+        run: npm run test
