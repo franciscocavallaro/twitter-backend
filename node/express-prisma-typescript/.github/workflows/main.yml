@@ -13,8 +13,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - name: Change working directory
-        run: cd node/express-prisma-typescript
-      - run: npm install
-        working-directory: node/express-prisma-typescript
-      - run: npm test
-        working-directory: node/express-prisma-typescript
+        working-directory: ./node/express-prisma-typescript
+        run: |
+          npm install
+          npm run test
