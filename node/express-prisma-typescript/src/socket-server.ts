@@ -21,8 +21,8 @@ socketServer.on('connection', async (socket) => {
   Logger.info(`Socket connected: ${socket.id}`)
 
   const userId = socket.data.userId
-
   const conversationsPreview = await conversationService.getConversationsByUserId(userId)
+
   socket.emit('conversations', conversationsPreview)
 
   socket.on('joinRoom', async (data) => {
