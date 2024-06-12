@@ -40,6 +40,7 @@ export const socketAuth = (socket: Socket): void => {
   if (!token) { throw new ForbiddenException() }
   jwt.verify(token, Constants.TOKEN_SECRET, (err, context) => {
     if (err) { throw new ForbiddenException() }
-    socket.data = context
+    if (!context || typeof context === 'string') { throw new ForbiddenException() }
+    socket.data.userId = context.userId
   })
 }

@@ -1,9 +1,12 @@
 import { Server } from 'socket.io'
 import { db, ForbiddenException, Logger, socketAuth } from '@utils'
 import { MessageRepositoryImpl } from '@domains/message/repository/message.repository.impl'
+import { ConversationServiceImpl } from '@domains/conversation/service'
+import { ConversationRepositoryImpl } from '@domains/conversation/repository'
 
 export const socketServer = new Server()
 const messageRepository = new MessageRepositoryImpl(db)
+const conversationService = new ConversationServiceImpl(new ConversationRepositoryImpl(db))
 
 socketServer.use((socket, next) => {
   try {
@@ -14,8 +17,13 @@ socketServer.use((socket, next) => {
   }
 })
 
-socketServer.on('connection', (socket) => {
+socketServer.on('connection', async (socket) => {
   Logger.info(`Socket connected: ${socket.id}`)
+
+  const userId = socket.data.userId
+
+  const conversationsPreview = await conversationService.getConversationsByUserId(userId)
+  socket.emit('conversations', conversationsPreview)
 
   socket.on('joinRoom', async (data) => {
     const id = data.conversationId

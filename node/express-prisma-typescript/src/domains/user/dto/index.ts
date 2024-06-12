@@ -28,6 +28,7 @@ export class ExtendedUserDTO extends UserDTO {
   username!: string
   password!: string
 }
+
 export class UserViewDTO {
   constructor (user: UserViewDTO) {
     this.id = user.id
@@ -37,7 +38,7 @@ export class UserViewDTO {
   }
 
   id: string
-  name: string
+  name: string | null
   username: string
   profilePicture: string | null
 }
