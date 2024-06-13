@@ -22,7 +22,7 @@ followerRouter.post('/follow/:user_id', async (req: Request, res: Response) => {
   }
 })
 
-followerRouter.post('/unfollow/:user_id', async (req: Request, res: Response) => {
+followerRouter.delete('/unfollow/:user_id', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const followedId = req.params.user_id
 

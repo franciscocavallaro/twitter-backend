@@ -5,7 +5,7 @@ import { Privacy } from '@prisma/client'
 
 export interface UserRepository {
   create: (data: SignupInputDTO) => Promise<UserDTO>
-  delete: (userId: string) => Promise<void>
+  delete: (userId: string) => Promise<UserDTO>
   getRecommendedUsersPaginated: (options: OffsetPagination) => Promise<UserDTO[]>
   getById: (userId: string) => Promise<UserViewDTO | null>
   getByEmailOrUsername: (email?: string, username?: string) => Promise<ExtendedUserDTO | null>

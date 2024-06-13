@@ -41,9 +41,9 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
 userRouter.delete('/', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
-  await service.deleteUser(userId)
+  const deleted = await service.deleteUser(userId)
 
-  return res.status(HttpStatus.OK)
+  return res.status(HttpStatus.OK).json(deleted)
 })
 
 userRouter.post('/upload_profile_image', async (req: Request, res: Response) => {

@@ -134,7 +134,7 @@
       }
     },
     "/api/follower/unfollow/{userId}": {
-      "post": {
+      "delete": {
         "description": "Unfollow a user",
         "security": [{
           "Bearer": []

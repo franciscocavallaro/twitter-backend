@@ -30,12 +30,13 @@ export class UserRepositoryImpl implements UserRepository {
       : null
   }
 
-  async delete (userId: any): Promise<void> {
-    await this.db.user.delete({
+  async delete (userId: any): Promise<UserDTO> {
+    const user = await this.db.user.delete({
       where: {
         id: userId
       }
     })
+    return new UserDTO(user)
   }
 
   async getRecommendedUsersPaginated (options: OffsetPagination): Promise<UserDTO[]> {

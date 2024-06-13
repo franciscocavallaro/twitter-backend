@@ -20,8 +20,8 @@ export class UserServiceImpl implements UserService {
     return await this.repository.getRecommendedUsersPaginated(options)
   }
 
-  async deleteUser (userId: any): Promise<void> {
-    await this.repository.delete(userId)
+  async deleteUser (userId: any): Promise<UserDTO> {
+    return await this.repository.delete(userId)
   }
 
   async uploadProfilePic (userId: string): Promise<string> {

@@ -21,6 +21,10 @@ export class FollowerServiceImpl implements FollowerService {
   }
 
   async unfollowUser (currentUserId: string, userId: string): Promise<boolean> {
+    const user = await this.userService.getUser(userId)
+    if (!user) {
+      throw new NotFoundException('user')
+    }
     return await this.repository.unfollowUser(currentUserId, userId)
   }
 
