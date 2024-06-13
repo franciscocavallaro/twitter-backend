@@ -12,6 +12,6 @@ export class ConversationPreviewDTO {
   id: string
   user1Id: string
   user2Id: string
-  lastMessage?: string
-  lastMessageUserViewDTO: UserViewDTO
+  lastMessage: string | null
+  lastMessageUserViewDTO: UserViewDTO | null
 }

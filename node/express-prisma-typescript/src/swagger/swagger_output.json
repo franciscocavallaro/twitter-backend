@@ -134,7 +134,7 @@
       }
     },
     "/api/follower/unfollow/{userId}": {
-      "delete": {
+      "post": {
         "description": "Unfollow a user",
         "security": [{
           "Bearer": []
@@ -198,14 +198,32 @@
             "description": "Unauthorized"
           }
         }
-      }
-    },
-    "/api/post": {
+      },
       "get": {
         "description": "Get all posts",
         "security": [{
           "Bearer": []
         }],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Posts retrieved successfully"
@@ -315,9 +333,7 @@
             "description": "Post not found"
           }
         }
-      }
-    },
-    "/api/reaction/{post_id}": {
+      },
       "delete": {
         "description": "Remove reaction from a post",
         "security": [{
@@ -329,6 +345,23 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "reaction": {
+                  "type": "string",
+                  "enum": [
+                    "LIKE",
+                    "RETWEET"
+                  ]
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -423,6 +456,12 @@
               "properties": {
                 "content": {
                   "type": "string"
+                },
+                "images": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -486,6 +525,24 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "responses": {
@@ -519,7 +576,7 @@
     },
     "/api/user/by_username/{username}": {
       "get": {
-        "description": "Get a user by their username",
+        "description": "Get a user by their username. The limit is an optional query parameter to limit the number of posts returned. The before and after query parameters are optional to paginate through the posts",
         "security": [{
           "Bearer": []
         }],
@@ -528,6 +585,24 @@
             "name": "username",
             "in": "path",
             "required": true,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
             "type": "string"
           }
         ],
@@ -601,14 +676,32 @@
             "description": "Unauthorized"
           }
         }
-      }
-    },
-    "/api/user": {
+      },
       "get": {
         "description": "Get recommendations",
         "security": [{
           "Bearer": []
         }],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Users retrieved successfully"
@@ -654,17 +747,10 @@
         }],
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "user_id",
+            "in": "path",
             "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "recipient": {
-                  "type": "string"
-                }
-              }
-            }
+            "type": "string"
           }
         ],
         "responses": {

@@ -1,10 +1,22 @@
 import { FollowerService } from '@domains/follower/service/follower.service'
 import { FollowerRepository } from '@domains/follower/repository/follower.repository'
+import { UserService, UserServiceImpl } from '@domains/user/service'
+import { UserRepositoryImpl } from '@domains/user/repository'
+import { db, NotFoundException, ValidationException } from '@utils'
 
 export class FollowerServiceImpl implements FollowerService {
   constructor (private readonly repository: FollowerRepository) {}
 
+  userService: UserService = new UserServiceImpl(new UserRepositoryImpl(db))
+
   async followUser (userId: string, followedId: string): Promise<boolean> {
+    if (userId === followedId) {
+      throw new ValidationException([{ message: 'You cannot follow yourself' }])
+    }
+    const followedUser = await this.userService.getUser(followedId)
+    if (!followedUser) {
+      throw new NotFoundException('user')
+    }
     return await this.repository.followUser(userId, followedId)
   }
 

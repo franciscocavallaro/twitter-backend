@@ -49,16 +49,24 @@ export class ConversationRepositoryImpl implements ConversationRepository {
         where: { conversationId: conversation.id },
         orderBy: { createdAt: 'desc' }
       })
-      const sender = lastMessage
-        ? await this.db.user.findUnique({
-          where: { id: lastMessage.senderId },
-          select: { id: true, name: true, email: true, profilePic: true, username: true }
+      if (!lastMessage) {
+        return new ConversationPreviewDTO({
+          id: conversation.id,
+          user1Id: conversation.user1,
+          user2Id: conversation.user2,
+          lastMessage: null,
+          lastMessageUserViewDTO: null
         })
-        : null
+      }
+      const sender = await this.db.user.findUnique({
+        where: { id: lastMessage.senderId },
+        select: { id: true, name: true, email: true, profilePic: true, username: true }
+      })
 
       if (!sender) {
         throw new NotFoundException('sender')
       }
+
       return new ConversationPreviewDTO({
         id: conversation.id,
         user1Id: conversation.user1,

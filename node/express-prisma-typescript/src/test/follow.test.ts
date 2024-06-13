@@ -9,8 +9,8 @@ describe('Follow', () => {
   const followerService = new FollowerServiceImpl(new FollowerRepositoryImpl(prismaMock))
 
   test('follow', async () => {
-    prismaMock.user.findFirst.mockResolvedValue(user)
-    prismaMock.user.findFirst.mockResolvedValue(user2)
+    prismaMock.user.findUnique.mockResolvedValue(user)
+    prismaMock.user.findUnique.mockResolvedValue(user2)
     prismaMock.follow.create.mockResolvedValue(follow)
 
     const followerService = new FollowerServiceImpl(new FollowerRepositoryImpl(prismaMock))
@@ -28,11 +28,17 @@ describe('Follow', () => {
   })
 
   test('follow twice', async () => {
-    prismaMock.follow.findFirst.mockResolvedValueOnce(follow)
-    prismaMock.follow.findFirst.mockResolvedValueOnce(follow)
+    prismaMock.user.findUnique.mockResolvedValue(user)
+    prismaMock.user.findUnique.mockResolvedValue(user2)
     prismaMock.follow.create.mockResolvedValue(follow)
+    prismaMock.follow.findFirst.mockResolvedValue(null)
 
-    const followerService = new FollowerServiceImpl(new FollowerRepositoryImpl(prismaMock))
+    await followerService.followUser(user.id, user2.id)
+
+    prismaMock.user.findUnique.mockResolvedValue(user)
+    prismaMock.user.findUnique.mockResolvedValue(user2)
+    prismaMock.follow.create.mockResolvedValue(follow)
+    prismaMock.follow.findFirst.mockResolvedValue(follow)
 
     const result = await followerService.followUser(user.id, user2.id)
     assert.deepStrictEqual(result, false)

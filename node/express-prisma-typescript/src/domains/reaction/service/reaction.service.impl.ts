@@ -33,7 +33,8 @@ export class ReactionServiceImpl implements ReactionService {
       throw new Error('Invalid reaction type')
     }
     const authorId = await this.postService.getAuthorByPost(postId)
-    if (await this.followService.doesRelationExist(reactorId, authorId) === null) {
+    const authorPrivacy = await this.userService.getPrivacy(authorId)
+    if (authorPrivacy !== 'PUBLIC' && await this.followService.doesRelationExist(reactorId, authorId) === null) {
       throw new Error('User is not allowed to delete reaction')
     }
     return await this.repository.deleteReaction(postId, reactorId, reaction)

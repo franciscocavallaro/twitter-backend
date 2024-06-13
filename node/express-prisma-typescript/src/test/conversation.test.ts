@@ -14,6 +14,12 @@ describe('Conversation', () => {
   const conversationService = new ConversationServiceImpl(conversationRepo)
 
   test('create conversation', async () => {
+    prismaMock.user.create.mockResolvedValue(user)
+    prismaMock.user.findUnique.mockResolvedValue(user)
+
+    prismaMock.user.create.mockResolvedValue(user2)
+    prismaMock.user.findUnique.mockResolvedValue(user2)
+
     prismaMock.follow.create.mockResolvedValue(follow)
     await followerService.followUser('1', '2')
     prismaMock.follow.findFirst.mockResolvedValue(follow)

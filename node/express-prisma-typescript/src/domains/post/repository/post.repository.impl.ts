@@ -67,13 +67,22 @@ export class PostRepositoryImpl implements PostRepository {
     })
   }
 
-  async getById (postId: string): Promise<PostDTO | null> {
+  async getById (postId: string): Promise<PostDTO | CommentDTO | null> {
     const post = await this.db.post.findUnique({
       where: {
         id: postId
       }
     })
-    return (post != null && post.isRelatedTo == null) ? new PostDTO(post) : null
+    if (!post) {
+      return null
+    }
+    if (post.isRelatedTo === null) {
+      return new PostDTO(post)
+    }
+    return new CommentDTO({
+      ...post,
+      relatedTo: post.isRelatedTo
+    })
   }
 
   async getByAuthorId (authorId: string): Promise<PostDTO[]> {
