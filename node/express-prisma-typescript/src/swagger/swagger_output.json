@@ -200,7 +200,7 @@
         }
       },
       "get": {
-        "description": "Get all posts",
+        "description": "Get all posts. The limit is an optional query parameter to limit the number of posts returned. The before and after query parameters are optional to paginate through the posts",
         "security": [{
           "Bearer": []
         }],
@@ -515,7 +515,7 @@
     },
     "/api/post/comment/{post_id}": {
       "get": {
-        "description": "Get all comments on a post",
+        "description": "Get all comments on a post. The limit is an optional query parameter to limit the number of posts returned. The before and after query parameters are optional to paginate through the posts",
         "security": [{
           "Bearer": []
         }],
@@ -678,7 +678,7 @@
         }
       },
       "get": {
-        "description": "Get recommendations",
+        "description": "Get recommendations. The limit is an optional query parameter to limit the number of posts returned. The before and after query parameters are optional to paginate through the posts",
         "security": [{
           "Bearer": []
         }],

@@ -123,12 +123,21 @@ export class PostServiceImpl implements PostService {
     const authorId = await this.getAuthorByPost(postId)
     const post = await this.repository.getById(postId)
     if (!post) throw new NotFoundException('post')
+
+    const images = post.images ?? []
+    const signedUrlsPromises = images.map(async image => await signedURL(image))
+    const signedUrls = await Promise.all(signedUrlsPromises)
+
+    if (authorId === userId) {
+      const { content, createdAt, updatedAt } = data
+      return await this.repository.comment(userId, postId, content, signedUrls, createdAt, updatedAt)
+    }
     if ((await this.checkIfPrivateAccount(authorId)) === Privacy.PRIVATE) {
       const doesFollowExist = await this.followerService.doesRelationExist(userId, authorId)
       if (!doesFollowExist) throw new ForbiddenException()
     }
-    const { content, images, createdAt, updatedAt } = data
-    return await this.repository.comment(userId, postId, content, images, createdAt, updatedAt)
+    const { content, createdAt, updatedAt } = data
+    return await this.repository.comment(userId, postId, content, signedUrls, createdAt, updatedAt)
   }
 
   async getCommentsByUserId (userId: string): Promise<CommentDTO[]> {

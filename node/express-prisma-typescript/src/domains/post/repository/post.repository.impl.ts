@@ -41,6 +41,7 @@ export class PostRepositoryImpl implements PostRepository {
       ],
       where: {
         isRelatedTo: null,
+        authorId: { not: userId },
         OR: [
           { author: { privacy: 'PUBLIC' } },
           {
@@ -75,9 +76,6 @@ export class PostRepositoryImpl implements PostRepository {
     })
     if (!post) {
       return null
-    }
-    if (post.isRelatedTo) {
-
     }
     return new PostDTO(post)
   }
