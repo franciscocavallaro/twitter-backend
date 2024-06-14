@@ -20,6 +20,9 @@ describe('Follow', () => {
   })
 
   test('unfollow', async () => {
+    prismaMock.user.findUnique.mockResolvedValue(user)
+    prismaMock.user.findUnique.mockResolvedValue(user2)
+
     prismaMock.follow.findFirst.mockResolvedValue(follow)
     prismaMock.follow.delete.mockResolvedValue(follow)
 
@@ -45,6 +48,9 @@ describe('Follow', () => {
   })
 
   test('unfollow when follow does not exist', async () => {
+    prismaMock.user.findUnique.mockResolvedValue(user)
+    prismaMock.user.findUnique.mockResolvedValue(user2)
+    prismaMock.follow.findFirst.mockResolvedValue(null)
     const result = await followerService.unfollowUser(user.id, user2.id)
     assert.deepStrictEqual(result, false)
   })
