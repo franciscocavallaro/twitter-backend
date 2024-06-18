@@ -7,7 +7,6 @@ import { ReactionType } from '@prisma/client'
 import { ReactionServiceImpl } from '@domains/reaction/service'
 import { ReactionRepositoryImpl } from '@domains/reaction/repository'
 import { comment, likeReaction, post, post2, postDTO, postsDTOS, retweetReaction, user } from './models'
-import { createTestScheduler } from 'jest'
 
 describe('Post', () => {
   const postService = new PostServiceImpl(new PostRepositoryImpl(prismaMock))
@@ -72,7 +71,7 @@ describe('Post', () => {
     prismaMock.post.findUnique.mockResolvedValue(post)
     prismaMock.user.findUnique.mockResolvedValue(user)
     prismaMock.post.create.mockResolvedValue(comment)
-    const commentResponse = await postService.commentPost('1', '1', 'content')
+    const commentResponse = await postService.commentPost('1', '1', { content: 'content' })
 
     const commentDTO = {
       id: comment.id,

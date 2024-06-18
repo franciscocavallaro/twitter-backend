@@ -2,7 +2,7 @@ import { CommentDTO, CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto
 import { PostRepository } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
-import { db, ForbiddenException, NotFoundException } from '@utils'
+import { db, ForbiddenException, NotFoundException, ValidationException } from '@utils'
 import { CursorPagination } from '@types'
 import { UserRepository, UserRepositoryImpl } from '@domains/user/repository'
 import { FollowerRepository, FollowerRepositoryImpl } from '@domains/follower/repository'
@@ -10,6 +10,7 @@ import { Privacy } from '@prisma/client'
 import { FollowerService, FollowerServiceImpl } from '@domains/follower/service'
 import { UserService, UserServiceImpl } from '@domains/user/service'
 import { signedURL } from '@s3-bucket'
+import { v4 as uuidv4 } from 'uuid'
 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository) {}
@@ -22,11 +23,18 @@ export class PostServiceImpl implements PostService {
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data)
+    const images = data.images
+
+    const imagesWithUUID = (images ?? []).map(() => {
+      const uniqueId = uuidv4()
+      return `${uniqueId}`
+    })
+
+    data.images = imagesWithUUID
 
     const post = await this.repository.create(userId, data)
 
-    const images = post.images ?? []
-    const signedUrlsPromises = images.map(async image => await signedURL(image))
+    const signedUrlsPromises = imagesWithUUID.map(async image => await signedURL(image))
     const signedUrls = await Promise.all(signedUrlsPromises)
 
     return {
@@ -123,9 +131,10 @@ export class PostServiceImpl implements PostService {
     const authorId = await this.getAuthorByPost(postId)
     const post = await this.repository.getById(postId)
     if (!post) throw new NotFoundException('post')
+    if (!data.content) throw new ValidationException([{ message: 'Content is required' }])
 
-    const images = post.images ?? []
-    const signedUrlsPromises = images.map(async image => await signedURL(image))
+    const images = data.images ?? []
+    const signedUrlsPromises = images.map(async (image: string) => await signedURL(postId + image))
     const signedUrls = await Promise.all(signedUrlsPromises)
 
     if (authorId === userId) {
